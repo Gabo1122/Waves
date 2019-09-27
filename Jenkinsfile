@@ -173,7 +173,7 @@ timeout(time:90, unit:'MINUTES') {
                                     testResults['unitTests'] = (pipelineStatus['unitTests']) ? 'success' : 'failure'
                                     ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Unit Tests', logUrls['unitTests'], testResults['unitTests'])
                                     sh "tar -czvf unit-test-reports.tar.gz -C target/test-reports/ . || true"
-                                    junit allowEmptyResults: true, keepLongStdio: true, testResults: '**/target/test-reports/*.xml'
+                                    junit allowEmptyResults: true, keepLongStdio: true, testResults: 'target/test-reports/*.xml'
                                     stash name: 'test-reports', allowEmpty: true, includes: 'unit-test-reports.tar.gz'
                                 }
                             }
@@ -213,7 +213,7 @@ timeout(time:90, unit:'MINUTES') {
                                     ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests', logUrls['integrationTests'], testResults['integrationTests'])
                                     sh "tar -czvf it-logs.tar.gz -C node-it/target/logs/ . || true"
                                     sh "tar -czvf it-test-reports.tar.gz -C target/test-reports/ . || true"
-                                    junit allowEmptyResults: true, keepLongStdio: true, testResults: '**/target/test-reports/*.xml'
+                                    junit allowEmptyResults: true, keepLongStdio: true, testResults: 'target/test-reports/*.xml'
                                     stash name: 'it-logs', allowEmpty: true, includes: 'node-logs.tar.gz, it-test-reports.tar.gz'
                                 }
                             }
