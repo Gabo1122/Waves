@@ -150,38 +150,49 @@ timeout(time:90, unit:'MINUTES') {
                         ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests', logUrls['integrationTests'])
                     }
 
-                    testTasks['Unit Tests'] = {
+                    testTasks['Integration Tests openjdk8'] = {
                         node('wavesnode'){
-                            stage('Unit Tests') {
+                            stage('Integration Tests openjdk8') {
                                 step([$class: 'WsCleanup'])
                                 unstash 'sources'
                                 env.branch=branch
-                                env.JAVA_HOME="${tool 'openjdk11'}"
+                                env.JAVA_HOME="${tool 'openjdk8'}"
                                 env.SBT_HOME="${tool 'sbt-1.2.8'}"
                                 env.PATH="${env.JAVA_HOME}/bin:${env.SBT_HOME}/bin:${env.PATH}"
+                                sh """
+                                    find ~/.ivy2/ -name '*SNAPSHOT*' -exec rm -rfv {} \\; || true
+                                    docker rm \$(docker ps -a | grep node | awk '{ print \$1 }') || true
+                                    docker rmi \$(docker images | grep node | awk '{ print \$3 }') || true
+                                    docker volume prune
+                                    docker ps -a
+                                    docker images
+                                    docker network ls
+                                """
                                 try{
+                                    ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests')
                                     sh """
                                         env
                                         java -version
                                         sbt sbtVersion
                                         SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled" \\
-                                            sbt ";update;clean;coverage;checkPR;coverageReport"
+                                            sbt ";update;clean;it/test"
                                     """
-                                    pipelineStatus['unitTests'] = true
+                                    pipelineStatus['integrationTests'] = true
                                 }
                                 finally{
-                                    testResults['unitTests'] = (pipelineStatus['unitTests']) ? 'success' : 'failure'
-                                    ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Unit Tests', logUrls['unitTests'], testResults['unitTests'])
-                                    sh "tar -czvf unit-test-reports.tar.gz -C target/test-reports/ . || true"
-                                    junit allowEmptyResults: true, keepLongStdio: true, testResults: 'target/test-reports/*.xml'
-                                    stash name: 'test-reports', allowEmpty: true, includes: 'unit-test-reports.tar.gz'
+                                    // testResults['integrationTests'] =  (pipelineStatus['integrationTests']) ? 'success' : 'failure'
+                                    // ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests', logUrls['integrationTests'], testResults['integrationTests'])
+                                    // sh "tar -czvf it-logs.tar.gz -C node-it/target/logs/ . || true"
+                                    // sh "tar -czvf it-test-reports.tar.gz -C target/test-reports/ . || true"
+                                    // junit allowEmptyResults: true, keepLongStdio: true, testResults: 'target/test-reports/*.xml'
+                                    // stash name: 'it-logs', allowEmpty: true, includes: 'node-logs.tar.gz, it-test-reports.tar.gz'
                                 }
                             }
                         }
                     }
-                    testTasks['Integration Tests'] = {
+                    testTasks['Integration Tests openjdk11'] = {
                         node('wavesnode'){
-                            stage('Integration Tests') {
+                            stage('Integration Tests openjdk11') {
                                 step([$class: 'WsCleanup'])
                                 unstash 'sources'
                                 env.branch=branch
@@ -209,12 +220,12 @@ timeout(time:90, unit:'MINUTES') {
                                     pipelineStatus['integrationTests'] = true
                                 }
                                 finally{
-                                    testResults['integrationTests'] =  (pipelineStatus['integrationTests']) ? 'success' : 'failure'
-                                    ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests', logUrls['integrationTests'], testResults['integrationTests'])
-                                    sh "tar -czvf it-logs.tar.gz -C node-it/target/logs/ . || true"
-                                    sh "tar -czvf it-test-reports.tar.gz -C target/test-reports/ . || true"
-                                    junit allowEmptyResults: true, keepLongStdio: true, testResults: 'target/test-reports/*.xml'
-                                    stash name: 'it-logs', allowEmpty: true, includes: 'node-logs.tar.gz, it-test-reports.tar.gz'
+                                    // testResults['integrationTests'] =  (pipelineStatus['integrationTests']) ? 'success' : 'failure'
+                                    // ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests', logUrls['integrationTests'], testResults['integrationTests'])
+                                    // sh "tar -czvf it-logs.tar.gz -C node-it/target/logs/ . || true"
+                                    // sh "tar -czvf it-test-reports.tar.gz -C target/test-reports/ . || true"
+                                    // junit allowEmptyResults: true, keepLongStdio: true, testResults: 'target/test-reports/*.xml'
+                                    // stash name: 'it-logs', allowEmpty: true, includes: 'node-logs.tar.gz, it-test-reports.tar.gz'
                                 }
                             }
                         }
@@ -234,13 +245,13 @@ timeout(time:90, unit:'MINUTES') {
                     println(err.toString())
                  }
                 finally{
-                    if (prInfo ||  releaseBranchNotify){
-                        ut.sendNotifications(prInfo, testResults, logUrls, branch, releaseBranchNotify)
-                    }
-                    ut.notifySlack("jenkins-notifications", currentBuild.result)
-                    unstash 'it-logs'
-                    unstash 'test-reports'
-                    archiveArtifacts artifacts: 'it-logs.tar.gz, unit-test-reports.tar.gz, it-test-reports.tar.gz'
+                    // if (prInfo ||  releaseBranchNotify){
+                    //     ut.sendNotifications(prInfo, testResults, logUrls, branch, releaseBranchNotify)
+                    // }
+                    // ut.notifySlack("jenkins-notifications", currentBuild.result)
+                    // unstash 'it-logs'
+                    // unstash 'test-reports'
+                    // archiveArtifacts artifacts: 'it-logs.tar.gz, unit-test-reports.tar.gz, it-test-reports.tar.gz'
                 }
             }
         }
