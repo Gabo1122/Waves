@@ -162,10 +162,9 @@ timeout(time:90, unit:'MINUTES') {
                                 try{
                                     sh """
                                         env
+                                        rm -rf ~/.sbt/1.0/staging
                                         java -version
                                         sbt sbtVersion
-                                        find . -type d -name target | xargs -I{} rm -rf {}
-                                        find ~/.sbt/1.0/staging/*/waves -type d -name target | xargs -I{} rm -rf {}
                                         SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled" \\
                                             sbt ";update;clean;coverage;checkPR;coverageReport"
                                     """
@@ -203,10 +202,9 @@ timeout(time:90, unit:'MINUTES') {
                                     ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests')
                                     sh """
                                         env
+                                        rm -rf ~/.sbt/1.0/staging
                                         java -version
                                         sbt sbtVersion
-                                        find . -type d -name target | xargs -I{} rm -rf {}
-                                        find ~/.sbt/1.0/staging/*/waves -type d -name target | xargs -I{} rm -rf {}
                                         SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled" \\
                                             sbt ";update;clean;it/test"
                                     """
