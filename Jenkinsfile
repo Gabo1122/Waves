@@ -48,7 +48,7 @@ properties([
         ut.wHideParameterDefinitionObject('pr_from_ref'),
         ut.wHideParameterDefinitionObject('head_commit_message'),
         ut.wHideParameterDefinitionObject('pull_request_number'),
-        ut.choiceParameterObject('branch', getGitBranchesScript(), Boolean.TRUE)
+        ut.choiceParameterObject('branch', getGitBranchesScript(), 'PARAMETER_TYPE_SINGLE_SELECT', Boolean.TRUE)
     ]),
 
     pipelineTriggers([
