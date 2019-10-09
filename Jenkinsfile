@@ -49,7 +49,7 @@ properties([
         ut.wHideParameterDefinitionObject('pr_from_ref'),
         ut.wHideParameterDefinitionObject('head_commit_message'),
         ut.wHideParameterDefinitionObject('pull_request_number'),
-        ut.choiceParameterObject('branch', getGitBranchesScript(), 'PARAMETER_TYPE_SINGLE_SELECT', Boolean.TRUE)
+        ut.choiceParameterObject('branch', getGitBranchesScript(repoUrl), 'PARAMETER_TYPE_SINGLE_SELECT', Boolean.TRUE)
     ]),
 
     pipelineTriggers([
@@ -76,7 +76,7 @@ stage('Aborting this build'){
     // Here we check if parameter 'branch' does not have any assigned value or it's value
     // is a default one -- '-- Failed to retrieve any data---'
     // In this case we won't proceed
-    if (params.branch && params.branch.length() && ! params.branch.contains('--')){
+    if (params.branch && params.branch.length() && !params.branch.contains('--')){
         branch = params.branch
     }
 
