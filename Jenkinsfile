@@ -76,7 +76,7 @@ stage('Aborting this build'){
     // Here we check if parameter 'branch' does not have any assigned value or it's value
     // is a default one -- '-- Failed to retrieve any data---'
     // In this case we won't proceed
-    if (params.branch && params.branch.length() && !params.branch.contains('--')){
+    if (params.branch && params.branch.length() && ! params.branch.contains('--')){
         branch = params.branch
     }
 
@@ -161,7 +161,7 @@ timeout(time:90, unit:'MINUTES') {
                                 env.branch=branch
                                 ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled')
                                 try{
-                                    sh 'SBT_THREAD_NUMBER=7 sbt ";update;clean;coverage;checkPR;coverageReport"'
+                                    sh "SBT_THREAD_NUMBER=7 sbt \";update;clean;coverage;checkPR;coverageReport\""
                                     pipelineStatus['unitTests'] = true
                                 }
                                 finally{
@@ -191,7 +191,7 @@ timeout(time:90, unit:'MINUTES') {
                                 """
                                 ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled"')
                                 try{
-                                    sh 'SBT_THREAD_NUMBER=7 sbt ";update;clean;it/test"'
+                                    sh "SBT_THREAD_NUMBER=7 sbt \";update;clean;it/test\""
                                     pipelineStatus['integrationTests'] = true
                                 }
                                 finally{
