@@ -42,6 +42,7 @@ def testResults = ['unitTests': false, 'integrationTests': false ]
 def releaseBranchNotify = false
 def jdkVersion = 'openjdk11'
 def sbtVersion = 'sbt-1.2.8'
+def slackChannel = "jenkins-notifications"
 properties([
     ut.buildDiscarderPropertyObject('14', '30'),
     parameters([
@@ -158,9 +159,9 @@ timeout(time:90, unit:'MINUTES') {
                                 step([$class: 'WsCleanup'])
                                 unstash 'sources'
                                 env.branch=branch
-                                ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled')
+                                ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled')
                                 try{
-                                    sh 'sbt ";update;clean;coverage;checkPR;coverageReport"'
+                                    sh 'SBT_THREAD_NUMBER=7 sbt ";update;clean;coverage;checkPR;coverageReport"'
                                     pipelineStatus['unitTests'] = true
                                 }
                                 finally{
@@ -188,9 +189,9 @@ timeout(time:90, unit:'MINUTES') {
                                     docker images
                                     docker network ls
                                 """
-                                ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled"')
+                                ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled"')
                                 try{
-                                    sh 'sbt ";update;clean;it/test"'
+                                    sh 'SBT_THREAD_NUMBER=7 sbt ";update;clean;it/test"'
                                     pipelineStatus['integrationTests'] = true
                                 }
                                 finally{
@@ -222,7 +223,7 @@ timeout(time:90, unit:'MINUTES') {
                     if (prInfo ||  releaseBranchNotify){
                         ut.sendNotifications(prInfo, testResults, logUrls, branch, releaseBranchNotify)
                     }
-                    ut.notifySlack("jenkins-notifications", currentBuild.result)
+                    slackIt(channel: slackChannel, buildStatus:currentBuild.result)
                     unstash 'it-logs'
                     unstash 'test-reports'
                     archiveArtifacts artifacts: 'it-logs.tar.gz, unit-test-reports.tar.gz, it-test-reports.tar.gz'
