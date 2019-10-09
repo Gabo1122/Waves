@@ -40,13 +40,15 @@ def pipelineStatus = ['unitTests': false, 'integrationTests': false]
 def logUrls = ['unitTests': false, 'integrationTests': false ]
 def testResults = ['unitTests': false, 'integrationTests': false ]
 def releaseBranchNotify = false
+def jdkVersion = 'openjdk11'
+def sbtVersion = 'sbt-1.2.8'
 properties([
     ut.buildDiscarderPropertyObject('14', '30'),
     parameters([
         ut.wHideParameterDefinitionObject('pr_from_ref'),
         ut.wHideParameterDefinitionObject('head_commit_message'),
         ut.wHideParameterDefinitionObject('pull_request_number'),
-        ut.choiceParameterObject('branch', scripts.getBranches(repoUrl), Boolean.TRUE)
+        ut.choiceParameterObject('branch', getGitBranchesScript(), Boolean.TRUE)
     ]),
 
     pipelineTriggers([
@@ -116,7 +118,7 @@ timeout(time:90, unit:'MINUTES') {
                         env.branch=branch
                         sh 'env'
                         step([$class: 'WsCleanup'])
-                        ut.checkout(branch, repoUrl)
+                        gitCheckout(branch: branch, url: repoUrl)
                         stash name: 'sources', includes: '**'
                         gitCommit = ut.shWithOutput("git rev-parse HEAD")
                         if (releaseBranchNotify){
@@ -156,19 +158,9 @@ timeout(time:90, unit:'MINUTES') {
                                 step([$class: 'WsCleanup'])
                                 unstash 'sources'
                                 env.branch=branch
-                                env.JAVA_HOME="${tool 'openjdk11'}"
-                                env.SBT_HOME="${tool 'sbt-1.2.8'}"
-                                env.PATH="${env.JAVA_HOME}/bin:${env.SBT_HOME}/bin:${env.PATH}"
+                                ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled')
                                 try{
-                                    sh """
-                                        env
-                                        find . -type d -name target | xargs -I{} rm -rf {}
-                                        find ~/.sbt/1.0/staging/*/waves -type d -name target | xargs -I{} rm -rf {}
-                                        java -version
-                                        sbt sbtVersion
-                                        SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled" \\
-                                            sbt ";update;clean;coverage;checkPR;coverageReport"
-                                    """
+                                    sh 'sbt ";update;clean;coverage;checkPR;coverageReport"'
                                     pipelineStatus['unitTests'] = true
                                 }
                                 finally{
@@ -187,9 +179,6 @@ timeout(time:90, unit:'MINUTES') {
                                 step([$class: 'WsCleanup'])
                                 unstash 'sources'
                                 env.branch=branch
-                                env.JAVA_HOME="${tool 'openjdk11'}"
-                                env.SBT_HOME="${tool 'sbt-1.2.8'}"
-                                env.PATH="${env.JAVA_HOME}/bin:${env.SBT_HOME}/bin:${env.PATH}"
                                 sh """
                                     find ~/.ivy2/ -name '*SNAPSHOT*' -exec rm -rfv {} \\; || true
                                     docker rm \$(docker ps -a | grep node | awk '{ print \$1 }') || true
@@ -199,17 +188,9 @@ timeout(time:90, unit:'MINUTES') {
                                     docker images
                                     docker network ls
                                 """
+                                ut.sbtPreconditions(jdkVersion, sbtVersion, 'SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled"')
                                 try{
-                                    ut.setGitHubBuildStatus(githubRepo, githubPersonalToken, gitCommit, 'Jenkins Integration Tests')
-                                    sh """
-                                        env
-                                        find . -type d -name target | xargs -I{} rm -rf {}
-                                        find ~/.sbt/1.0/staging/*/waves -type d -name target | xargs -I{} rm -rf {}
-                                        java -version
-                                        sbt sbtVersion
-                                        SBT_THREAD_NUMBER=7 SBT_OPTS="-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled" \\
-                                            sbt ";update;clean;it/test"
-                                    """
+                                    sh 'sbt ";update;clean;it/test"'
                                     pipelineStatus['integrationTests'] = true
                                 }
                                 finally{
