@@ -109,7 +109,7 @@ if (currentBuild.result == Constants.PIPELINE_ABORTED){
 }
 
 timeout(time:90, unit:'MINUTES') {
-    node{
+    node('wavesnode'){
         currentBuild.result = Constants.PIPELINE_SUCCESS
         timestamps {
             wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
