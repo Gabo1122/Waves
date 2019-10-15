@@ -109,7 +109,7 @@ if (currentBuild.result == Constants.PIPELINE_ABORTED){
 }
 
 timeout(time:90, unit:'MINUTES') {
-    node('wavesnode'){
+    node('integrationTests'){
         currentBuild.result = Constants.PIPELINE_SUCCESS
         timestamps {
             wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
@@ -154,14 +154,14 @@ timeout(time:90, unit:'MINUTES') {
                     }
 
                     testTasks['Unit Tests'] = {
-                        node('wavesnode'){
+                        node('vostok'){
                             stage('Unit Tests') {
                                 step([$class: 'WsCleanup'])
                                 unstash 'sources'
                                 env.branch=branch
                                 ut.sbtPreconditions(jdkVersion, sbtVersion, '-Xmx3g -Xms3g -XX:ReservedCodeCacheSize=128m -XX:+CMSClassUnloadingEnabled')
                                 try{
-                                    sh "SBT_THREAD_NUMBER=7 sbt \";update;clean;coverage;checkPR;coverageReport\""
+                                    // sh "SBT_THREAD_NUMBER=7 sbt \";update;clean;coverage;checkPR;coverageReport\""
                                     pipelineStatus['unitTests'] = true
                                 }
                                 finally{
@@ -175,7 +175,7 @@ timeout(time:90, unit:'MINUTES') {
                         }
                     }
                     testTasks['Integration Tests'] = {
-                        node('wavesnode'){
+                        // node('integrationTests'){
                             stage('Integration Tests') {
                                 step([$class: 'WsCleanup'])
                                 unstash 'sources'
@@ -203,7 +203,7 @@ timeout(time:90, unit:'MINUTES') {
                                     stash name: 'it-logs', allowEmpty: true, includes: 'node-logs.tar.gz, it-test-reports.tar.gz'
                                 }
                             }
-                        }
+                        // }
                     }
                     // this option below controls if we fail the whole job in case any of the parallel steps fail
                     // testTasks.failFast = true
