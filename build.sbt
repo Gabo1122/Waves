@@ -109,7 +109,7 @@ inScope(Global)(
     organizationName := "CR Dex Platform",
     V.fallback := (1, 1, 3),
     organizationHomepage := Some(url("https://crcoinico.com")),
-    scmInfo := Some(ScmInfo(url("https://github.com/gabo1122/crdex"), "git@github.com:gabo1122/crdex.git", None)),
+    scmInfo := Some(ScmInfo(url("https://github.com/gabo1122/crdex"), "git@github.com:gabo1122/Waves.git", None)),
     licenses := Seq(("MIT", url("https://github.com/wavesplatform/Waves/blob/master/LICENSE"))),
     scalacOptions ++= Seq(
       "-feature",
