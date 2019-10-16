@@ -2,7 +2,7 @@ import WavesDockerKeys._
 
 enablePlugins(WavesDockerPlugin, ItTestPlugin)
 
-description := "NODE integration tests"
+description := "CR DEX NODE integration tests"
 libraryDependencies ++= Dependencies.it
 
 def stageFiles(ref: ProjectReference): TaskKey[File] =
@@ -10,7 +10,7 @@ def stageFiles(ref: ProjectReference): TaskKey[File] =
 
 inTask(docker)(
   Seq(
-    imageNames := Seq(ImageName("com.wavesplatform/node-it")),
+    imageNames := Seq(ImageName("com.crdexplatform/node-it")),
     exposedPorts := Set(6863, 6869, 6870), // NetworkApi, RestApi, gRPC
     additionalFiles ++= Seq(
       stageFiles(LocalProject("node")).value,
