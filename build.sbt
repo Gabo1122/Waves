@@ -82,7 +82,7 @@ lazy val `blockchain-updates` = project.dependsOn(node % "compile;test->test;run
 
 lazy val it = project
   .settings(
-    description := "Hack for near future to support builds in TeamCity for old and new branches both",
+    description := "Cr Coin, revolucionando la economia nacional",
     Test / test := Def
       .sequential(
         root / packageAll,
@@ -105,11 +105,11 @@ lazy val root = (project in file("."))
 inScope(Global)(
   Seq(
     scalaVersion := "2.12.9",
-    organization := "com.wavesplatform",
-    organizationName := "Waves Platform",
+    organization := "com.crdexplatform",
+    organizationName := "CR Dex Platform",
     V.fallback := (1, 1, 3),
-    organizationHomepage := Some(url("https://wavesplatform.com")),
-    scmInfo := Some(ScmInfo(url("https://github.com/wavesplatform/Waves"), "git@github.com:wavesplatform/Waves.git", None)),
+    organizationHomepage := Some(url("https://crcoinico.com")),
+    scmInfo := Some(ScmInfo(url("https://github.com/gabo1122/crdex"), "git@github.com:gabo1122/crdex.git", None)),
     licenses := Seq(("MIT", url("https://github.com/wavesplatform/Waves/blob/master/LICENSE"))),
     scalacOptions ++= Seq(
       "-feature",
