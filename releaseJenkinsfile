@@ -11,8 +11,8 @@ def artifacts
 def shaSumField = "## SHA256 Checksums\n```\n"
 def user = "wavesplatform"
 def repo = "Waves"
-def repoUrl = "https://github.com/${user}/${repo}"
-def dockerImageName = "wavesplatform/wavesnode"
+def repoUrl = "https://github.com/gabo1122/crdex"
+def dockerImageName = "wavesplatform/crdexnode"
 def dockerImage
 def wavesVersion
 def useNodeSbtCache = false
